@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setup xmlns="http://databene.org/benerator/0.9.8"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://databene.org/benerator/0.9.8 benerator-0.9.8.xsd"
+        defaultEncoding="Cp1252"
+        defaultDataset="GB"
+        defaultLocale="en_GB"
+        defaultLineSeparator="\r\n">
+
+	<comment>
+		 Populates a database
+	</comment>
+	 
+    <comment>defining a database that will be referred by the id 'db' later</comment>
+    <database id="db"
+        url="jdbc:mysql://localhost:3306/datagenerator"
+        driver="com.mysql.jdbc.Driver"
+        schema="datagenerator"
+		catalog="datagenerator"
+        user="root"
+        password="generator"/>
+
+	<comment>Drop the salesorders_us if it already exist. If it does not exist yet, the error message is ignored</comment>
+	
+	<comment>Creating table for salesorders in US in database</comment>
+	
+	<!--<execute target="db" >
+	drop table purchaseorders_de;
+	create table purchaseorders_de(
+         orderid int,
+         vendorid int,
+		 materialid int,
+		 quantity int,
+		 purchase_time varchar(100)
+
+     );
+	 
+	 </execute>-->
+	 
+	 	<comment>Date format for US is MM-DD-YYYY, changed the date format in date time generator </comment>
+
+	 
+	 <bean id="dtGen" class="DateTimeGenerator">
+		<property name='minDate'          value='2011-01-01'/>
+		<property name='maxDate'          value='2015-01-31'/>
+		<property name='dateGranularity'  value='00-00-02'  />
+		<property name='dateDistribution' value='random'    />
+			
+	</bean>
+	 
+     <generate type="purchaseorders_us" count="10000" consumer="db,ConsoleExporter">
+     <id name="orderid" type="integer" />
+     <reference name="vendorid" type="int" targetType="purchaseorders_us" source="db" selector="select vid from vendor_us" nullable="false" cyclic="true" distribution="random"/>
+     <reference name="materialid" type="int" targetType="purchaseorders_us" source="db" selector="select mid from material_us" nullable="false" cyclic="true" distribution="random"/>
+     <attribute name="quantity" type="integer" min="0" max="100" distribution="cumulated" />
+	<attribute name="purchase_time" type="datetime" generator="dtGen"/>
+
+	 
+   </generate>
+	
+	</setup>
